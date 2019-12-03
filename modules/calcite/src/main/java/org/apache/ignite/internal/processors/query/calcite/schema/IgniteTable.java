@@ -76,12 +76,10 @@ public class IgniteTable extends AbstractTable implements TranslatableTable {
     }
 
     public DistributionTrait distributionTrait(PlannerContext context) {
-        return Commons.plannerContext(context).distributionTrait(CU.cacheId(cacheName), rowType);
+        return context.distributionTrait(CU.cacheId(cacheName), rowType);
     }
 
     public FragmentInfo fragmentInfo(PlannerContext ctx) {
-        PlannerContext ctx0 = Commons.plannerContext(ctx);
-
-        return new FragmentInfo(ctx0.mapForCache(CU.cacheId(cacheName), ctx0.topologyVersion()));
+        return new FragmentInfo(ctx.mapForCache(CU.cacheId(cacheName), ctx.topologyVersion()));
     }
 }

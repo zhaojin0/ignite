@@ -22,7 +22,7 @@ import java.util.function.BiFunction;
 /**
  *
  */
-public class JoinNode extends AbstractNode {
+public class JoinNode extends AbstractNode<Object[]> {
     private final BiFunction<Object[], Object[], Object[]> expression;
     private final ArraySink<Object[]> left;
     private final ArraySink<Object[]> right;

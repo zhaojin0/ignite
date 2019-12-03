@@ -76,6 +76,7 @@ import org.apache.ignite.internal.processors.query.calcite.rule.PlannerType;
 import org.apache.ignite.internal.processors.query.calcite.serialize.Graph;
 import org.apache.ignite.internal.processors.query.calcite.serialize.relation.GraphToRelConverter;
 import org.apache.ignite.internal.processors.query.calcite.serialize.relation.RelGraph;
+import org.apache.ignite.internal.processors.query.calcite.serialize.relation.RelToGraphConverter;
 import org.apache.ignite.internal.processors.query.calcite.splitter.QueryPlan;
 import org.apache.ignite.internal.processors.query.calcite.splitter.Splitter;
 import org.apache.ignite.internal.processors.query.calcite.type.IgniteTypeFactory;
@@ -247,10 +248,13 @@ public class IgnitePlanner implements Planner, RelOptTable.ViewExpander {
         return new Splitter().go((IgniteRel) rel);
     }
 
-    public Graph graph(RelNode node) {
+    public Graph graph(RelNode rel) {
         ready();
 
-        return null; // TODO
+        if (rel.getConvention() != IgniteRel.IGNITE_CONVENTION)
+            throw new IllegalArgumentException("IGNITE_CONVENTION is required.");
+
+        return new RelToGraphConverter().convert((IgniteRel) rel);
     }
 
     /** {@inheritDoc} */
