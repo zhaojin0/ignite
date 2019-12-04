@@ -22,7 +22,7 @@ import java.util.List;
 /**
  *
  */
-public abstract class AbstractNode<T> implements Node<T>, Source {
+public abstract class AbstractNode<T> implements Node<T> {
     protected final Sink<T> target;
     protected List<Source> sources;
 

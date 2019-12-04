@@ -23,9 +23,9 @@ import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.rel.RelNode;
 import org.apache.ignite.internal.processors.query.calcite.rel.IgniteExchange;
+import org.apache.ignite.internal.processors.query.calcite.rel.IgniteReceiver;
 import org.apache.ignite.internal.processors.query.calcite.rel.IgniteRel;
-import org.apache.ignite.internal.processors.query.calcite.rel.Receiver;
-import org.apache.ignite.internal.processors.query.calcite.rel.Sender;
+import org.apache.ignite.internal.processors.query.calcite.rel.IgniteSender;
 import org.apache.ignite.internal.processors.query.calcite.util.IgniteRelShuttle;
 
 /**
@@ -50,18 +50,18 @@ public class Splitter extends IgniteRelShuttle {
         RelTraitSet inputTraits = input.getTraitSet();
         RelTraitSet outputTraits = rel.getTraitSet();
 
-        Sender sender = new Sender(cluster, inputTraits, visit(input));
+        IgniteSender sender = new IgniteSender(cluster, inputTraits, visit(input));
         Fragment fragment = new Fragment(sender);
         fragments.add(fragment);
 
-        return new Receiver(cluster, outputTraits, sender.getRowType(), fragment);
+        return new IgniteReceiver(cluster, outputTraits, sender.getRowType(), fragment);
     }
 
-    @Override public RelNode visit(Receiver rel) {
+    @Override public RelNode visit(IgniteReceiver rel) {
         throw new AssertionError("An attempt to split an already split task.");
     }
 
-    @Override public RelNode visit(Sender rel) {
+    @Override public RelNode visit(IgniteSender rel) {
         throw new AssertionError("An attempt to split an already split task.");
     }
 

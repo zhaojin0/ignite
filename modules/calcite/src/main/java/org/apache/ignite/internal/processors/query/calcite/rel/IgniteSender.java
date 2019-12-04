@@ -16,6 +16,7 @@
 
 package org.apache.ignite.internal.processors.query.calcite.rel;
 
+import java.util.List;
 import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.rel.RelNode;
@@ -25,12 +26,11 @@ import org.apache.ignite.internal.processors.query.calcite.metadata.IgniteMdDist
 import org.apache.ignite.internal.processors.query.calcite.splitter.Target;
 import org.apache.ignite.internal.processors.query.calcite.trait.DistributionTraitDef;
 import org.apache.ignite.internal.processors.query.calcite.util.RelImplementor;
-import org.jetbrains.annotations.NotNull;
 
 /**
  *
  */
-public final class Sender extends SingleRel implements IgniteRel {
+public final class IgniteSender extends SingleRel implements IgniteRel {
     private Target target;
 
     /**
@@ -39,14 +39,18 @@ public final class Sender extends SingleRel implements IgniteRel {
      * @param traits Trait set.
      * @param input Input relational expression
      */
-    public Sender(RelOptCluster cluster, RelTraitSet traits, RelNode input) {
+    public IgniteSender(RelOptCluster cluster, RelTraitSet traits, RelNode input) {
         super(cluster, traits, input);
     }
 
-    private Sender(RelOptCluster cluster, RelTraitSet traits, RelNode input, @NotNull Target target) {
+    private IgniteSender(RelOptCluster cluster, RelTraitSet traits, RelNode input, Target target) {
         super(cluster, traits, input);
 
         this.target = target;
+    }
+
+    @Override public RelNode copy(RelTraitSet traitSet, List<RelNode> inputs) {
+        return new IgniteSender(getCluster(), traitSet, sole(inputs), target);
     }
 
     /** {@inheritDoc} */
@@ -62,7 +66,7 @@ public final class Sender extends SingleRel implements IgniteRel {
         return target;
     }
 
-    public static Sender create(RelNode input, Target target) {
+    public static IgniteSender create(RelNode input, Target target) {
         RelOptCluster cluster = input.getCluster();
         RelMetadataQuery mq = cluster.getMetadataQuery();
 
@@ -70,6 +74,6 @@ public final class Sender extends SingleRel implements IgniteRel {
             .replace(IgniteRel.IGNITE_CONVENTION)
             .replaceIf(DistributionTraitDef.INSTANCE, () -> IgniteMdDistribution.distribution(input, mq));
 
-        return new Sender(cluster, traits, input, target);
+        return new IgniteSender(cluster, traits, input, target);
     }
 }

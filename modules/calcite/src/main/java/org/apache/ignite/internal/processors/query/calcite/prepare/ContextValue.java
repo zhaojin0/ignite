@@ -14,14 +14,31 @@
  * limitations under the License.
  */
 
-package org.apache.ignite.internal.processors.query.calcite.exec;
+package org.apache.ignite.internal.processors.query.calcite.prepare;
 
-import java.util.List;
+import org.apache.calcite.DataContext;
+import org.apache.ignite.internal.processors.cache.version.GridCacheVersion;
 
 /**
  *
  */
-public interface Node<T> extends Source {
-    Sink<T> sink(int idx);
-    void sources(List<Source> sources);
+public enum ContextValue {
+    QUERY_ID("_query_id", GridCacheVersion.class),
+    PLANNER_CONTEXT("_planner_context", PlannerContext.class);
+
+    private final String valueName;
+    private final Class type;
+
+    ContextValue(String valueName, Class type) {
+        this.valueName = valueName;
+        this.type = type;
+    }
+
+    public String valueName() {
+        return valueName;
+    }
+
+    public <T> T get(DataContext ctx) {
+        return (T) type.cast(ctx.get(valueName));
+    }
 }

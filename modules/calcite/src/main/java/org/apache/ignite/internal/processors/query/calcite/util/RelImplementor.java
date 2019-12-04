@@ -20,10 +20,10 @@ import org.apache.ignite.internal.processors.query.calcite.rel.IgniteExchange;
 import org.apache.ignite.internal.processors.query.calcite.rel.IgniteFilter;
 import org.apache.ignite.internal.processors.query.calcite.rel.IgniteJoin;
 import org.apache.ignite.internal.processors.query.calcite.rel.IgniteProject;
+import org.apache.ignite.internal.processors.query.calcite.rel.IgniteReceiver;
 import org.apache.ignite.internal.processors.query.calcite.rel.IgniteRel;
+import org.apache.ignite.internal.processors.query.calcite.rel.IgniteSender;
 import org.apache.ignite.internal.processors.query.calcite.rel.IgniteTableScan;
-import org.apache.ignite.internal.processors.query.calcite.rel.Receiver;
-import org.apache.ignite.internal.processors.query.calcite.rel.Sender;
 
 /**
  *
@@ -34,7 +34,7 @@ public interface RelImplementor<T> {
     T implement(IgniteJoin rel);
     T implement(IgniteProject rel);
     T implement(IgniteTableScan rel);
-    T implement(Receiver rel);
-    T implement(Sender rel);
+    T implement(IgniteReceiver rel);
+    T implement(IgniteSender rel);
     T implement(IgniteRel other);
 }

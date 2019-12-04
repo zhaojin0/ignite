@@ -28,14 +28,14 @@ import org.apache.ignite.internal.processors.query.calcite.util.RelImplementor;
 /**
  *
  */
-public final class Receiver extends AbstractRelNode implements IgniteRel {
+public final class IgniteReceiver extends AbstractRelNode implements IgniteRel {
     private final Source source;
 
     /**
      * @param cluster Cluster this relational expression belongs to
      * @param traits Trait set.
      */
-    public Receiver(RelOptCluster cluster, RelTraitSet traits, RelDataType rowType, Source source) {
+    public IgniteReceiver(RelOptCluster cluster, RelTraitSet traits, RelDataType rowType, Source source) {
         super(cluster, traits);
         this.rowType = rowType;
         this.source = source;

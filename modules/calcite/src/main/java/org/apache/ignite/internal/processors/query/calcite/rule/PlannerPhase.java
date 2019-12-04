@@ -19,6 +19,7 @@ package org.apache.ignite.internal.processors.query.calcite.rule;
 
 import org.apache.calcite.tools.RuleSet;
 import org.apache.calcite.tools.RuleSets;
+import org.apache.ignite.internal.processors.query.calcite.exec.Interpretable;
 import org.apache.ignite.internal.processors.query.calcite.prepare.PlannerContext;
 
 /**
@@ -36,6 +37,13 @@ public enum PlannerPhase {
     LOGICAL("Logical planning") {
         @Override public RuleSet getRules(PlannerContext ctx) {
             return RuleSets.ofList(IgniteRules.logicalRules(ctx));
+        }
+    },
+
+    /** */
+    PHYSICAL("Execution tree building") {
+        @Override public RuleSet getRules(PlannerContext ctx) {
+            return RuleSets.ofList(Interpretable.RULES);
         }
     };
 

@@ -50,14 +50,14 @@ public class ExecutionTest extends GridCommonAbstractTest {
             new Object[]{1, "Roman", "Kondakov"},
             new Object[]{2, "Ivan", "Pavlukhin"},
             new Object[]{3, "Alexey", "Goncharuk"}
-        ).iterator());
+        ));
 
         ScanNode projects = new ScanNode(join.sink(1), Arrays.asList(
             new Object[]{0, 2, "Calcite"},
             new Object[]{1, 1, "SQL"},
             new Object[]{2, 2, "Ignite"},
             new Object[]{3, 0, "Core"}
-        ).iterator());
+        ));
 
         join.sources(Arrays.asList(persons, projects));
 

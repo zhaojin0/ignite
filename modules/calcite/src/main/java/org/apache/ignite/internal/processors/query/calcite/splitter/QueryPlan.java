@@ -24,8 +24,8 @@ import org.apache.ignite.internal.processors.query.IgniteSQLException;
 import org.apache.ignite.internal.processors.query.calcite.metadata.OptimisticPlanningException;
 import org.apache.ignite.internal.processors.query.calcite.metadata.RelMetadataQueryEx;
 import org.apache.ignite.internal.processors.query.calcite.prepare.PlannerContext;
-import org.apache.ignite.internal.processors.query.calcite.rel.Receiver;
-import org.apache.ignite.internal.processors.query.calcite.rel.Sender;
+import org.apache.ignite.internal.processors.query.calcite.rel.IgniteReceiver;
+import org.apache.ignite.internal.processors.query.calcite.rel.IgniteSender;
 import org.apache.ignite.internal.processors.query.calcite.util.Edge;
 import org.apache.ignite.internal.util.typedef.F;
 
@@ -62,11 +62,11 @@ public class QueryPlan {
                 RelOptCluster cluster = child.getCluster();
                 RelTraitSet traitSet = child.getTraitSet();
 
-                Sender sender = new Sender(cluster, traitSet, child);
+                IgniteSender sender = new IgniteSender(cluster, traitSet, child);
                 Fragment fragment = new Fragment(sender);
                 fragments.add(fragment);
 
-                parent.replaceInput(edge.childIdx(), new Receiver(cluster, traitSet, sender.getRowType(), fragment));
+                parent.replaceInput(edge.childIdx(), new IgniteReceiver(cluster, traitSet, sender.getRowType(), fragment));
             }
         }
     }

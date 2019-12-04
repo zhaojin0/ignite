@@ -25,8 +25,8 @@ import org.apache.ignite.internal.processors.query.calcite.metadata.FragmentInfo
 import org.apache.ignite.internal.processors.query.calcite.metadata.IgniteMdFragmentInfo;
 import org.apache.ignite.internal.processors.query.calcite.metadata.NodesMapping;
 import org.apache.ignite.internal.processors.query.calcite.prepare.PlannerContext;
-import org.apache.ignite.internal.processors.query.calcite.rel.Receiver;
-import org.apache.ignite.internal.processors.query.calcite.rel.Sender;
+import org.apache.ignite.internal.processors.query.calcite.rel.IgniteReceiver;
+import org.apache.ignite.internal.processors.query.calcite.rel.IgniteSender;
 import org.apache.ignite.internal.processors.query.calcite.trait.DistributionTrait;
 import org.apache.ignite.internal.util.typedef.F;
 
@@ -55,11 +55,11 @@ public class Fragment implements Source {
         else
             mapping = info.mapping().deduplicate();
 
-        ImmutableList<Pair<Receiver, Source>> sources = info.sources();
+        ImmutableList<Pair<IgniteReceiver, Source>> sources = info.sources();
 
         if (!F.isEmpty(sources)) {
-            for (Pair<Receiver, Source> input : sources) {
-                Receiver receiver = input.left;
+            for (Pair<IgniteReceiver, Source> input : sources) {
+                IgniteReceiver receiver = input.left;
                 Source source = input.right;
 
                 source.init(mapping, receiver.distribution(), ctx, mq);
@@ -74,7 +74,7 @@ public class Fragment implements Source {
     @Override public void init(NodesMapping mapping, DistributionTrait distribution, PlannerContext ctx, RelMetadataQuery mq) {
         assert remote();
 
-        ((Sender) root).init(new TargetImpl(exchangeId, mapping, distribution));
+        ((IgniteSender) root).init(new TargetImpl(exchangeId, mapping, distribution));
 
         init(ctx, mq);
     }
@@ -88,6 +88,6 @@ public class Fragment implements Source {
     }
 
     private boolean remote() {
-        return root instanceof Sender;
+        return root instanceof IgniteSender;
     }
 }

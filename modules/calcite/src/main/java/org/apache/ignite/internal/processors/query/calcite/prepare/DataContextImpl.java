@@ -26,15 +26,9 @@ import org.apache.calcite.schema.SchemaPlus;
 /**
  *
  */
-class DataContextImpl implements DataContext {
+public class DataContextImpl implements DataContext {
     /** */
-    private final JavaTypeFactory typeFactory;
-
-    /** */
-    private final SchemaPlus schema;
-
-    /** */
-    private final QueryProvider queryProvider;
+    private final PlannerContext ctx;
 
     /** */
     private final Map<String, Object> params;
@@ -43,31 +37,31 @@ class DataContextImpl implements DataContext {
      * @param params Parameters.
      * @param ctx Query context.
      */
-    DataContextImpl(Map<String, Object> params, PlannerContext ctx) {
-        typeFactory = ctx.typeFactory();
-        schema = ctx.schema();
-        queryProvider = ctx.queryProvider();
-
+    public DataContextImpl(Map<String, Object> params, PlannerContext ctx) {
         this.params = params;
+        this.ctx = ctx;
     }
 
     /** {@inheritDoc} */
     @Override public SchemaPlus getRootSchema() {
-        return schema;
+        return ctx.schema();
     }
 
     /** {@inheritDoc} */
     @Override public JavaTypeFactory getTypeFactory() {
-        return typeFactory;
+        return ctx.typeFactory();
     }
 
     /** {@inheritDoc} */
     @Override public QueryProvider getQueryProvider() {
-        return queryProvider;
+        return ctx.queryProvider();
     }
 
     /** {@inheritDoc} */
     @Override public Object get(String name) {
+        if (ContextValue.PLANNER_CONTEXT.valueName().equals(name))
+            return ctx;
+
         return params.get(name);
     }
 }

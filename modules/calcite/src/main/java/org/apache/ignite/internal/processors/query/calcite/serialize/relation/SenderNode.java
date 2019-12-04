@@ -18,7 +18,7 @@ package org.apache.ignite.internal.processors.query.calcite.serialize.relation;
 
 import java.util.List;
 import org.apache.calcite.rel.RelNode;
-import org.apache.ignite.internal.processors.query.calcite.rel.Sender;
+import org.apache.ignite.internal.processors.query.calcite.rel.IgniteSender;
 import org.apache.ignite.internal.processors.query.calcite.splitter.Target;
 import org.apache.ignite.internal.util.typedef.F;
 
@@ -32,11 +32,11 @@ public class SenderNode extends RelGraphNode {
         this.target = target;
     }
 
-    public static SenderNode create(Sender rel) {
+    public static SenderNode create(IgniteSender rel) {
         return new SenderNode(rel.target());
     }
 
     @Override public RelNode toRel(ConversionContext ctx, List<RelNode> children) {
-        return Sender.create(F.first(children), target);
+        return IgniteSender.create(F.first(children), target);
     }
 }

@@ -21,7 +21,11 @@ package org.apache.ignite.internal.processors.query.calcite;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import org.apache.calcite.DataContext;
+import org.apache.calcite.linq4j.Enumerable;
+import org.apache.calcite.linq4j.Linq4j;
 import org.apache.calcite.plan.Context;
 import org.apache.calcite.plan.Contexts;
 import org.apache.calcite.plan.ConventionTraitDef;
@@ -34,9 +38,15 @@ import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.tools.Frameworks;
 import org.apache.ignite.internal.processors.affinity.AffinityTopologyVersion;
+import org.apache.ignite.internal.processors.cache.version.GridCacheVersion;
+import org.apache.ignite.internal.processors.query.calcite.exec.ConsumerNode;
+import org.apache.ignite.internal.processors.query.calcite.exec.Interpretable;
+import org.apache.ignite.internal.processors.query.calcite.exec.Node;
 import org.apache.ignite.internal.processors.query.calcite.metadata.MappingService;
 import org.apache.ignite.internal.processors.query.calcite.metadata.NodesMapping;
 import org.apache.ignite.internal.processors.query.calcite.metadata.TableDistributionService;
+import org.apache.ignite.internal.processors.query.calcite.prepare.ContextValue;
+import org.apache.ignite.internal.processors.query.calcite.prepare.DataContextImpl;
 import org.apache.ignite.internal.processors.query.calcite.prepare.IgnitePlanner;
 import org.apache.ignite.internal.processors.query.calcite.prepare.PlannerContext;
 import org.apache.ignite.internal.processors.query.calcite.prepare.Query;
@@ -56,17 +66,22 @@ import org.apache.ignite.internal.processors.query.calcite.trait.DistributionTra
 import org.apache.ignite.internal.processors.query.calcite.trait.IgniteDistributions;
 import org.apache.ignite.internal.processors.query.calcite.type.RowType;
 import org.apache.ignite.internal.processors.query.calcite.util.Commons;
+import org.apache.ignite.internal.util.typedef.F;
 import org.apache.ignite.internal.util.typedef.internal.CU;
 import org.apache.ignite.marshaller.jdk.JdkMarshaller;
 import org.apache.ignite.testframework.junits.GridTestKernalContext;
+import org.apache.ignite.testframework.junits.WithSystemProperty;
 import org.apache.ignite.testframework.junits.common.GridCommonAbstractTest;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import static org.apache.ignite.internal.processors.query.calcite.exec.Interpretable.INTERPRETABLE;
 
 /**
  *
  */
-//@WithSystemProperty(key = "calcite.debug", value = "true")
+@WithSystemProperty(key = "calcite.debug", value = "true")
 public class CalciteQueryProcessorTest extends GridCommonAbstractTest {
 
     private static GridTestKernalContext kernalContext;
@@ -89,30 +104,55 @@ public class CalciteQueryProcessorTest extends GridCommonAbstractTest {
                 .field("name", String.class)
                 .field("projectId", Integer.class)
                 .field("cityId", Integer.class)
-                .build()));
+                .build()){
+            @Override public Enumerable<Object[]> scan(DataContext root) {
+                return Linq4j.asEnumerable(Arrays.asList(
+                    new Object[]{0, null, 0, "Igor", 0, 1},
+                    new Object[]{1, null, 1, "Roman", 0, 0}
+                ));
+            }
+        });
 
         publicSchema.addTable(new IgniteTable("Project", "Project",
             RowType.builder()
                 .keyField("id", Integer.class, true)
                 .field("name", String.class)
                 .field("ver", Integer.class)
-                .build()));
-
-
+                .build()){
+            @Override public Enumerable<Object[]> scan(DataContext root) {
+                return Linq4j.asEnumerable(Arrays.asList(
+                    new Object[]{0, null, 0, "Calcite", 1},
+                    new Object[]{1, null, 1, "Ignite", 1}
+                ));
+            }
+        });
 
         publicSchema.addTable(new IgniteTable("Country", "Country",
             RowType.builder()
                 .keyField("id", Integer.class, true)
                 .field("name", String.class)
                 .field("countryCode", Integer.class)
-                .build()));
+                .build()){
+            @Override public Enumerable<Object[]> scan(DataContext root) {
+                return Linq4j.asEnumerable(Arrays.<Object[]>asList(
+                    new Object[]{0, null, 0, "Russia", 7}
+                ));
+            }
+        });
 
         publicSchema.addTable(new IgniteTable("City", "City",
             RowType.builder()
                 .keyField("id", Integer.class, true)
                 .field("name", String.class)
                 .field("countryId", Integer.class)
-                .build()));
+                .build()){
+            @Override public Enumerable<Object[]> scan(DataContext root) {
+                return Linq4j.asEnumerable(Arrays.asList(
+                    new Object[]{0, null, 0, "Moscow", 0},
+                    new Object[]{1, null, 1, "Saint Petersburg", 0}
+                ));
+            }
+        });
 
         schema = Frameworks
             .createRootSchema(false)
@@ -484,6 +524,96 @@ public class CalciteQueryProcessorTest extends GridCommonAbstractTest {
         assertNotNull(plan);
 
         assertTrue(plan.fragments().size() == 2);
+    }
+
+    @Test
+    public void testPhysicalPlan() throws Exception {
+        String sql = "SELECT d.id, d.name, d.projectId, p.name0, p.ver0 " +
+            "FROM PUBLIC.Developer d JOIN (" +
+            "SELECT pp.id as id0, pp.name as name0, pp.ver as ver0 FROM PUBLIC.Project pp" +
+            ") p " +
+            "ON d.projectId = p.id0 " +
+            "WHERE (d.projectId + 1) > ?";
+
+        PlannerContext ctx = proc.context(Contexts.empty(), sql, new Object[]{-10}, this::context);
+
+        assertNotNull(ctx);
+
+        RelTraitDef[] traitDefs = {
+            DistributionTraitDef.INSTANCE,
+            ConventionTraitDef.INSTANCE
+        };
+
+        try (IgnitePlanner planner = proc.planner(traitDefs, ctx)){
+            assertNotNull(planner);
+
+            Query query = Commons.plannerContext(ctx).query();
+
+            assertNotNull(planner);
+
+            // Parse
+            SqlNode sqlNode = planner.parse(query.sql());
+
+            // Validate
+            sqlNode = planner.validate(sqlNode);
+
+            // Convert to Relational operators graph
+            RelRoot relRoot = planner.rel(sqlNode);
+
+            RelNode rel = relRoot.rel;
+
+            // Transformation chain
+            rel = planner.transform(PlannerType.HEP, PlannerPhase.SUBQUERY_REWRITE, rel, rel.getTraitSet());
+
+            RelTraitSet desired = rel.getCluster().traitSet()
+                .replace(IgniteRel.IGNITE_CONVENTION)
+                .replace(IgniteDistributions.single())
+                .simplify();
+
+            rel = planner.transform(PlannerType.VOLCANO, PlannerPhase.LOGICAL, rel, desired);
+
+            assertNotNull(relRoot);
+
+            QueryPlan plan = new Splitter().go((IgniteRel) rel);
+
+            assertNotNull(plan);
+
+            plan.init(ctx);
+
+            assertNotNull(plan);
+
+            assertTrue(plan.fragments().size() == 2);
+
+            desired = rel.getCluster().traitSetOf(INTERPRETABLE);
+
+            RelNode phys = planner.transform(PlannerType.VOLCANO, PlannerPhase.PHYSICAL, plan.fragments().get(1).root(), desired);
+
+            assertNotNull(phys);
+
+            Map<String, Object> params = ctx.query().params(F.asMap(ContextValue.QUERY_ID.valueName(), new GridCacheVersion()));
+
+            Interpretable.Implementor<Object[]> implementor = new Interpretable.Implementor<>(new DataContextImpl(params, ctx));
+
+            Node<Object[]> exec = implementor.go(phys.getInput(0));
+
+            assertNotNull(exec);
+
+            assertTrue(exec instanceof ConsumerNode);
+
+            ConsumerNode consumer = (ConsumerNode) exec;
+
+            assertTrue(consumer.hasNext());
+
+            ArrayList<Object[]> res = new ArrayList<>();
+
+            while (consumer.hasNext())
+                res.add(consumer.next());
+
+            assertFalse(res.isEmpty());
+
+            Assert.assertArrayEquals(new Object[]{0, "Igor", 0, "Calcite", 1}, res.get(0));
+            Assert.assertArrayEquals(new Object[]{1, "Roman", 0, "Calcite", 1}, res.get(1));
+        }
     }
 
     @Test

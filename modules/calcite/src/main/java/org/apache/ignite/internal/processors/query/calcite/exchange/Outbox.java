@@ -45,7 +45,7 @@ public class Outbox<T> extends AbstractNode<T> implements SingleNode<T>, Sink<T>
 
     private ExchangeProcessor srvc;
 
-    protected Outbox(GridCacheVersion queryId, long exchangeId, Collection<UUID> targets, DestinationFunction function) {
+    public Outbox(GridCacheVersion queryId, long exchangeId, Collection<UUID> targets, DestinationFunction function) {
         super(Sink.noOp());
         this.queryId = queryId;
         this.exchangeId = exchangeId;

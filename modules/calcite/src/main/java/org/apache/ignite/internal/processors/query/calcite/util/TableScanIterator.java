@@ -34,7 +34,7 @@ import static org.apache.ignite.internal.processors.cache.GridCacheUtils.UNDEFIN
 /**
  *
  */
-public class ScanIterator<T> extends GridCloseableIteratorAdapter<T> {
+public class TableScanIterator<T> extends GridCloseableIteratorAdapter<T> {
     private final int cacheId;
     private final Iterator<GridDhtLocalPartition> parts;
     private final Function<CacheDataRow, T> typeWrapper;
@@ -54,7 +54,7 @@ public class ScanIterator<T> extends GridCloseableIteratorAdapter<T> {
      */
     private T next;
 
-    public ScanIterator(int cacheId, Iterator<GridDhtLocalPartition> parts, Function<CacheDataRow, T> typeWrapper,
+    public TableScanIterator(int cacheId, Iterator<GridDhtLocalPartition> parts, Function<CacheDataRow, T> typeWrapper,
         Predicate<CacheDataRow> typeFilter) {
         this.cacheId = cacheId;
         this.parts = parts;

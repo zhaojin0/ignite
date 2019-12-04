@@ -17,12 +17,15 @@
 
 package org.apache.ignite.internal.processors.query.calcite.schema;
 
+import org.apache.calcite.DataContext;
+import org.apache.calcite.linq4j.Enumerable;
 import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelOptTable;
 import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
+import org.apache.calcite.schema.ScannableTable;
 import org.apache.calcite.schema.TranslatableTable;
 import org.apache.calcite.schema.impl.AbstractTable;
 import org.apache.ignite.internal.processors.query.calcite.metadata.FragmentInfo;
@@ -36,7 +39,7 @@ import org.apache.ignite.internal.processors.query.calcite.util.Commons;
 import org.apache.ignite.internal.util.typedef.internal.CU;
 
 /** */
-public class IgniteTable extends AbstractTable implements TranslatableTable {
+public class IgniteTable extends AbstractTable implements TranslatableTable, ScannableTable {
     private final String tableName;
     private final String cacheName;
     private final RowType rowType;
@@ -81,5 +84,9 @@ public class IgniteTable extends AbstractTable implements TranslatableTable {
 
     public FragmentInfo fragmentInfo(PlannerContext ctx) {
         return new FragmentInfo(ctx.mapForCache(CU.cacheId(cacheName), ctx.topologyVersion()));
+    }
+
+    @Override public Enumerable<Object[]> scan(DataContext root) {
+        throw new AssertionError(); // TODO
     }
 }

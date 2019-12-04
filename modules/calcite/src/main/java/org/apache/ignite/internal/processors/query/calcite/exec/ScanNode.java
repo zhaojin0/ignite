@@ -22,18 +22,19 @@ import java.util.List;
 /**
  *
  */
-public class ScanNode implements SingleNode<Object[]>, Source{
+public class ScanNode implements SingleNode<Object[]> {
     private static final Object[] END = new Object[0];
 
     /** */
     private final Sink<Object[]> target;
-    private final Iterator<Object[]> it;
+    private final Iterable<Object[]> source;
 
+    private Iterator<Object[]> it;
     private Object[] row;
 
-    protected ScanNode(Sink<Object[]> target, Iterator<Object[]> it) {
+    protected ScanNode(Sink<Object[]> target, Iterable<Object[]> source) {
         this.target = target;
-        this.it = it;
+        this.source = source;
     }
 
     @Override public void signal() {
@@ -44,6 +45,9 @@ public class ScanNode implements SingleNode<Object[]>, Source{
             return;
 
         row = null;
+
+        if (it == null)
+            it = source.iterator();
 
         while (it.hasNext()) {
             row = it.next();

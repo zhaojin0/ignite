@@ -29,8 +29,8 @@ import org.apache.calcite.rel.metadata.RelMetadataProvider;
 import org.apache.calcite.rel.metadata.RelMetadataQuery;
 import org.apache.calcite.util.Pair;
 import org.apache.ignite.internal.processors.query.calcite.metadata.IgniteMetadata.FragmentMetadata;
+import org.apache.ignite.internal.processors.query.calcite.rel.IgniteReceiver;
 import org.apache.ignite.internal.processors.query.calcite.rel.IgniteTableScan;
-import org.apache.ignite.internal.processors.query.calcite.rel.Receiver;
 import org.apache.ignite.internal.processors.query.calcite.util.Edge;
 import org.apache.ignite.internal.processors.query.calcite.util.IgniteMethod;
 
@@ -93,7 +93,7 @@ public class IgniteMdFragmentInfo implements MetadataHandler<FragmentMetadata> {
         return new OptimisticPlanningException(msg, new Edge(rel, rel.getRight(), 1), cause);
     }
 
-    public FragmentInfo getFragmentInfo(Receiver rel, RelMetadataQuery mq) {
+    public FragmentInfo getFragmentInfo(IgniteReceiver rel, RelMetadataQuery mq) {
         return new FragmentInfo(Pair.of(rel, rel.source()));
     }
 

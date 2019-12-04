@@ -22,9 +22,9 @@ import org.apache.ignite.internal.processors.query.calcite.rel.IgniteExchange;
 import org.apache.ignite.internal.processors.query.calcite.rel.IgniteFilter;
 import org.apache.ignite.internal.processors.query.calcite.rel.IgniteJoin;
 import org.apache.ignite.internal.processors.query.calcite.rel.IgniteProject;
+import org.apache.ignite.internal.processors.query.calcite.rel.IgniteReceiver;
+import org.apache.ignite.internal.processors.query.calcite.rel.IgniteSender;
 import org.apache.ignite.internal.processors.query.calcite.rel.IgniteTableScan;
-import org.apache.ignite.internal.processors.query.calcite.rel.Receiver;
-import org.apache.ignite.internal.processors.query.calcite.rel.Sender;
 
 /**
  *
@@ -42,11 +42,11 @@ public class IgniteRelShuttle extends RelShuttleImpl {
         return visitChild(rel, 0, rel.getInput());
     }
 
-    public RelNode visit(Receiver rel) {
+    public RelNode visit(IgniteReceiver rel) {
         return rel;
     }
 
-    public RelNode visit(Sender rel) {
+    public RelNode visit(IgniteSender rel) {
         return visitChild(rel, 0, rel.getInput());
     }
 
@@ -65,10 +65,10 @@ public class IgniteRelShuttle extends RelShuttleImpl {
             return visit((IgniteFilter)rel);
         if (rel instanceof IgniteProject)
             return visit((IgniteProject)rel);
-        if (rel instanceof Receiver)
-            return visit((Receiver)rel);
-        if (rel instanceof Sender)
-            return visit((Sender)rel);
+        if (rel instanceof IgniteReceiver)
+            return visit((IgniteReceiver)rel);
+        if (rel instanceof IgniteSender)
+            return visit((IgniteSender)rel);
         if (rel instanceof IgniteTableScan)
             return visit((IgniteTableScan)rel);
         if (rel instanceof IgniteJoin)
