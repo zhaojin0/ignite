@@ -233,44 +233,44 @@ private[ignite] class IgniteExternalCatalog(defaultIgniteContext: IgniteContext)
     override def listFunctions(db: String, pattern: String): Seq[String] = Seq.empty[String]
 
     /** @inheritdoc */
-    override def doAlterDatabase(dbDefinition: CatalogDatabase): Unit =
+    override def alterDatabase(dbDefinition: CatalogDatabase): Unit =
         throw new UnsupportedOperationException("unsupported")
 
     /** @inheritdoc */
-    override def doAlterFunction(db: String, funcDefinition: CatalogFunction): Unit =
+    override def alterFunction(db: String, funcDefinition: CatalogFunction): Unit =
         throw new UnsupportedOperationException("unsupported")
 
     /** @inheritdoc */
-    override def doAlterTableStats(db: String, table: String, stats: Option[CatalogStatistics]): Unit =
-        throw new UnsupportedOperationException("unsupported")
-
-	/** @inheritdoc */
-	override def doAlterTable(tableDefinition: CatalogTable): Unit =
-		throw new UnsupportedOperationException("unsupported")
-
-	/** @inheritdoc */
-	override def doAlterTableDataSchema(db: String, table: String, schema: StructType): Unit =
-		throw new UnsupportedOperationException("unsupported")
-
-    /** @inheritdoc */
-    override protected def doCreateFunction(db: String, funcDefinition: CatalogFunction): Unit = { /* no-op */ }
-
-    /** @inheritdoc */
-    override protected def doDropFunction(db: String, funcName: String): Unit = { /* no-op */ }
-
-    /** @inheritdoc */
-    override protected def doRenameFunction(db: String, oldName: String, newName: String): Unit = { /* no-op */ }
-
-    /** @inheritdoc */
-    override protected def doCreateDatabase(dbDefinition: CatalogDatabase, ignoreIfExists: Boolean): Unit =
+    override def alterTableStats(db: String, table: String, stats: Option[CatalogStatistics]): Unit =
         throw new UnsupportedOperationException("unsupported")
 
     /** @inheritdoc */
-    override protected def doDropDatabase(db: String, ignoreIfNotExists: Boolean, cascade: Boolean): Unit =
+    override def alterTable(tableDefinition: CatalogTable): Unit =
         throw new UnsupportedOperationException("unsupported")
 
     /** @inheritdoc */
-    override protected def doCreateTable(tableDefinition: CatalogTable, ignoreIfExists: Boolean): Unit = {
+    override def alterTableDataSchema(db: String, table: String, schema: StructType): Unit =
+        throw new UnsupportedOperationException("unsupported")
+
+    /** @inheritdoc */
+    override def createFunction(db: String, funcDefinition: CatalogFunction): Unit = { /* no-op */ }
+
+    /** @inheritdoc */
+    override def dropFunction(db: String, funcName: String): Unit = { /* no-op */ }
+
+    /** @inheritdoc */
+    override def renameFunction(db: String, oldName: String, newName: String): Unit = { /* no-op */ }
+
+    /** @inheritdoc */
+    override def createDatabase(dbDefinition: CatalogDatabase, ignoreIfExists: Boolean): Unit =
+        throw new UnsupportedOperationException("unsupported")
+
+    /** @inheritdoc */
+    override def dropDatabase(db: String, ignoreIfNotExists: Boolean, cascade: Boolean): Unit =
+        throw new UnsupportedOperationException("unsupported")
+
+    /** @inheritdoc */
+    override def createTable(tableDefinition: CatalogTable, ignoreIfExists: Boolean): Unit = {
         val ignite = igniteOrDefault(tableDefinition.identifier.database.getOrElse(DEFAULT_DATABASE), default)
 
         igniteSQLTable(ignite, tableDefinition.identifier.table) match {
@@ -289,7 +289,7 @@ private[ignite] class IgniteExternalCatalog(defaultIgniteContext: IgniteContext)
     }
 
     /** @inheritdoc */
-    override protected def doDropTable(db: String, tabName: String, ignoreIfNotExists: Boolean, purge: Boolean): Unit = {
+    override def dropTable(db: String, tabName: String, ignoreIfNotExists: Boolean, purge: Boolean): Unit = {
         val ignite = igniteOrDefault(db, default)
 
         igniteSQLTable(ignite, tabName) match {
@@ -305,7 +305,7 @@ private[ignite] class IgniteExternalCatalog(defaultIgniteContext: IgniteContext)
     }
 
     /** @inheritdoc */
-    override protected def doRenameTable(db: String, oldName: String, newName: String): Unit =
+    override def renameTable(db: String, oldName: String, newName: String): Unit =
         throw new UnsupportedOperationException("unsupported")
 
     /** @inheritdoc */

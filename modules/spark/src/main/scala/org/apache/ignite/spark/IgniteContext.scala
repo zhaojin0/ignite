@@ -47,8 +47,9 @@ class IgniteContext(
         Logging.log.warn("Embedded mode is deprecated and will be discontinued. Consider using standalone mode instead.")
 
         // Get required number of executors with default equals to number of available executors.
+        // fixed SPARK-20659
         val workers = sparkContext.getConf.getInt("spark.executor.instances",
-            sparkContext.getExecutorStorageStatus.length)
+            sparkContext.getRDDStorageInfo.length)
 
         if (workers <= 0)
             throw new IllegalStateException("No Spark executors found to start Ignite nodes.")
@@ -165,8 +166,9 @@ class IgniteContext(
         // additional check if called from driver
         if (sparkContext != null && shutdownIgniteOnWorkers) {
             // Get required number of executors with default equals to number of available executors.
+            // fixed SPARK-20659
             val workers = sparkContext.getConf.getInt("spark.executor.instances",
-                sparkContext.getExecutorStorageStatus.length)
+                sparkContext.getRDDStorageInfo.length)
 
             if (workers > 0) {
                 Logging.log.info("Will stop Ignite nodes on " + workers + " workers")

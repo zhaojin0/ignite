@@ -99,8 +99,11 @@ class IgniteSparkSession private(
     override def version: String = proxy.version
 
     /** @inheritdoc */
-    override def emptyDataset[T: Encoder]: Dataset[T] = {
-        val encoder = implicitly[Encoder[T]]
+//    override def emptyDataset[T: Encoder]: Dataset[T] = {
+//        val encoder = implicitly[Encoder[T]]
+//        new Dataset(self, LocalRelation(encoder.schema.toAttributes), encoder)
+//    }
+    override  def emptyDataset[T](implicit encoder: Encoder[T]):Dataset[T] = {
         new Dataset(self, LocalRelation(encoder.schema.toAttributes), encoder)
     }
 

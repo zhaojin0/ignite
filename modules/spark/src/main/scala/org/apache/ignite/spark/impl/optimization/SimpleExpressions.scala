@@ -88,7 +88,7 @@ private[optimization] object SimpleExpressions extends SupportedExpressions {
         case ar: AttributeReference ⇒
             val name =
                 if (useQualifier)
-                    ar.qualifier.map(_ + "." + ar.name).getOrElse(ar.name)
+                    ar.qualifier.map(_ + "." + ar.name).headOption.getOrElse(ar.name)
                 else
                     ar.name
 
